@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using RestSharp;
+using ServiceStack;
 using StocksProject.Models;
 
 namespace StocksProject.Controllers
@@ -20,20 +25,36 @@ namespace StocksProject.Controllers
 
         public IActionResult Index()
         {
+            ViewData["Message"] = "Your stock profile";
+
+            //Parent class for parsing down to nested values
+            var avData = new AlphaVantage();
+
+                //Send string to api and get back CSV file in string
+                var response = $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=GOOG&datatype=csv&apikey=QBT57BYWKH947L5Z"
+                        .GetStringFromUrl();
+            try
+            {
+                //Parse data from CSV string to new variable
+                var allData = response.FromCsv<List<Quote>>().ToList();
+
+                //Put parsed data into AlphaVantage object for use in view
+                avData.Entries = allData.ToList();
+            }
+            catch
+            {
+                avData.ErrorMessage = "ERROR : Information parsed incorrectly";
+            }
+
+            return View(avData);
+        }
+        public IActionResult StockPage()
+        {
+
+
             return View();
         }
-        public IActionResult Random()
-        {
-            ViewData["Message"] = "Your stock profile";
-            var myStock = new Stock()
-            {
-                Id = 1,
-                Name = "GOOG",
-                Price = "$23.99"
-            };
 
-            return View(myStock);
-        }
 
         public IActionResult Privacy()
         {

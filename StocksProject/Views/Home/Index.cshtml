@@ -1,8 +1,33 @@
-﻿@{
+﻿@model StocksProject.Models.AlphaVantage
+@{
+
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome</h1><br/>
+
+    <h2>Top Five Technology Stocks</h2>
+    @if (@Model.ErrorMessage == "")
+    {
+        @foreach (var s in @Model.Entries)
+        {
+            <div class="d-inline-block">
+                <div>Stock Symbol : @s.Symbol</div>
+                <div>Open Price : @s.Open.ToString("C2")</div>
+                <div>High Price : @s.High.ToString("C2")</div>
+                <div>Low Price : @s.Low.ToString("C2")</div>
+                <div>Price : @s.Price.ToString("C2")</div>
+                <div>Volume : @s.Volume.ToString()</div>
+                <div>Latest Day : @s.LatestDay.ToString("dd-MM-yyyy")</div>
+                <div>Previous Close : @s.PreviousClose.ToString("C2")</div>
+                <div>Change : @s.Change.ToString("C2")</div>
+                <div>Change Percent : @s.ChangePercent.ToString()</div>
+                </div>
+        }
+    }
+    else
+    {
+        <div>@Model.ErrorMessage.ToString()</div>
+    }
 </div>
