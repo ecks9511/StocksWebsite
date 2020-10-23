@@ -27,26 +27,47 @@ namespace StocksProject.Controllers
         {
             ViewData["Message"] = "Your stock profile";
 
-            //Parent class for parsing down to nested values
-            var avData = new AlphaVantage();
+            List<String> stockNames = new List<string>();
+            List<AlphaVantageData> allInfo = new List<AlphaVantageData>();
+
+            //Add stocks to go check
+            stockNames.Add("GOOG");
+            stockNames.Add("TSLA");
+            stockNames.Add("MSFT");
+            stockNames.Add("AMZN");
+            stockNames.Add("AAPL");
+
+            //Loop through and display stock info
+            foreach (var curStock in stockNames)
+            {
+                //Parent class for parsing down to nested values
+                var avData = new AlphaVantageData();
 
                 //Send string to api and get back CSV file in string
-                var response = $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=GOOG&datatype=csv&apikey=QBT57BYWKH947L5Z"
+                var response =
+                    $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={curStock}&datatype=csv&apikey=QBT57BYWKH947L5Z"
                         .GetStringFromUrl();
-            try
-            {
-                //Parse data from CSV string to new variable
-                var allData = response.FromCsv<List<Quote>>().ToList();
+                try
+                {
+                    //Parse data from CSV string to new variable
+                    var allData = response.FromCsv<List<Quote>>().ToList();
 
-                //Put parsed data into AlphaVantage object for use in view
-                avData.Entries = allData.ToList();
-            }
-            catch
-            {
-                avData.ErrorMessage = "ERROR : Information parsed incorrectly";
+                    //Add name for specific stock 
+                    avData.Name = curStock;
+
+                    //Put parsed data into AlphaVantage object for use in view
+                    avData.Entries = allData.ToList();
+                }
+                catch
+                {
+                    avData.ErrorMessage = "ERROR : Information parsed incorrectly";
+                }
+
+                //Add to parent class
+                allInfo.Add(avData);
             }
 
-            return View(avData);
+            return View(allInfo);
         }
         public IActionResult StockPage()
         {

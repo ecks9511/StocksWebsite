@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace StocksProject.Models
 {
-    public class AlphaVantage
+    public class AlphaVantageData 
     {
         public string Name { get; set; } = "";
         public List<Quote> Entries { get; set; } = new List<Quote>();
