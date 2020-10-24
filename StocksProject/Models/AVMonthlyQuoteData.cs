@@ -11,8 +11,10 @@ namespace StocksProject.Models
         public string Name { get; set; } = "";
         public string Symbol { get; set; } = "";
         public List<MonthlyQuote> Entries { get; set; } = new List<MonthlyQuote>();
+
+        public List<double> EntryOpenPrices { get; set; }
+        public List<String> EntryDateTime { get; set; }
         public string ErrorMessage { get; set; } = "";
 
-        public ChartJSCore.Models.Chart FrontChart { get; set; }
     }
 }

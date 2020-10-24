@@ -37,12 +37,16 @@ namespace StocksProject.Controllers
             String apiKey = "3Y8HPMEXDL322QUV"; //String apiKey = "QBT57BYWKH947L5Z";
             
             //Lists for storing all of the data objects to send to the view
+            AVAllData allData = new AVAllData();
             List<AVMonthlyQuoteData> allMonthlyQuoteData = new List<AVMonthlyQuoteData>();
 
             //Loop through and grab all of the monthly stock info
             foreach (var curStock in stockNames)
             {
 
+                //Lists for graphing
+                List<double> openPrices = new List<double>();
+                List<String> dates = new List<String>();
                 //Parent class for parsing down to nested values
                 var avData = new AVMonthlyQuoteData();
 
@@ -50,18 +54,33 @@ namespace StocksProject.Controllers
                 var response =
                     $"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={curStock}&datatype=csv&apikey={apiKey}"
                         .GetStringFromUrl();
+
+                Console.WriteLine(response);
                 try
                 {
                     //Parse data from CSV string to new variable
-                    var allData = response.FromCsv<List<MonthlyQuote>>().ToList();
+                    var allMonthly = response.FromCsv<List<MonthlyQuote>>().ToList();
 
                     //Add name for specific stock 
                     avData.Name = stockNamesFull.ElementAt(curName);
                     avData.Symbol = stockNames.ElementAt(curName);
 
+                    //Add all of the prices to parent object for later graphing
+                    for (int i = 0; i < allMonthly.Count; i++)
+                    {
+                        openPrices.Add(allMonthly[i].Open);
+                        dates.Add(allMonthly[i].Timestamp.ToString("MM-dd-yyyy"));
+
+                    }
+                    //So dates arent backwards
+                    dates.Reverse();
+
+                    //Adding graph data
+                    avData.EntryOpenPrices = openPrices;
+                    avData.EntryDateTime = dates;
 
                     //Put parsed data into AlphaVantage object for use in view
-                    avData.Entries = allData.ToList();
+                    avData.Entries = allMonthly.ToList();
                 }
                 catch
                 {
@@ -75,7 +94,10 @@ namespace StocksProject.Controllers
                 curName++;
             }
 
-            return View(allMonthlyQuoteData);
+            //Put into parent object
+            allData.allMonthlyData = allMonthlyQuoteData;
+
+            return View(allData);
         }
         public IActionResult Stocks()
         {
