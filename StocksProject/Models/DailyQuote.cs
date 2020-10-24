@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace StocksProject.Models
 {
-    public class Quote
+    public class DailyQuote
     {
         public string Symbol { get; set; }
         public double Open { get; set; }

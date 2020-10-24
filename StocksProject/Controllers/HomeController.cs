@@ -5,12 +5,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ChartJSCore.Helpers;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using ServiceStack;
 using StocksProject.Models;
+using ChartJSCore.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace StocksProject.Controllers
 {
@@ -25,35 +28,37 @@ namespace StocksProject.Controllers
 
         public IActionResult Index()
         {
-            ViewData["Message"] = "Your stock profile";
+            //Stocks to grab with their corresponding full names
+            List<String> stockNames = new List<string> { "GOOG", "TSLA", "MSFT", "AMZN", "AAPL" };
+            List<String> stockNamesFull = new List<string> { "Google", "Tesla", "Microsoft", "Amazon", "Apple" };
+            int curName = 0;
 
-            List<String> stockNames = new List<string>();
-            List<AlphaVantageData> allInfo = new List<AlphaVantageData>();
+            //API keys for calls
+            String apiKey = "3Y8HPMEXDL322QUV"; //String apiKey = "QBT57BYWKH947L5Z";
+            
+            //Lists for storing all of the data objects to send to the view
+            List<AVMonthlyQuoteData> allMonthlyQuoteData = new List<AVMonthlyQuoteData>();
 
-            //Add stocks to go check
-            stockNames.Add("GOOG");
-            stockNames.Add("TSLA");
-            stockNames.Add("MSFT");
-            stockNames.Add("AMZN");
-            stockNames.Add("AAPL");
-
-            //Loop through and display stock info
+            //Loop through and grab all of the monthly stock info
             foreach (var curStock in stockNames)
             {
+
                 //Parent class for parsing down to nested values
-                var avData = new AlphaVantageData();
+                var avData = new AVMonthlyQuoteData();
 
                 //Send string to api and get back CSV file in string
                 var response =
-                    $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={curStock}&datatype=csv&apikey=QBT57BYWKH947L5Z"
+                    $"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={curStock}&datatype=csv&apikey={apiKey}"
                         .GetStringFromUrl();
                 try
                 {
                     //Parse data from CSV string to new variable
-                    var allData = response.FromCsv<List<Quote>>().ToList();
+                    var allData = response.FromCsv<List<MonthlyQuote>>().ToList();
 
                     //Add name for specific stock 
-                    avData.Name = curStock;
+                    avData.Name = stockNamesFull.ElementAt(curName);
+                    avData.Symbol = stockNames.ElementAt(curName);
+
 
                     //Put parsed data into AlphaVantage object for use in view
                     avData.Entries = allData.ToList();
@@ -64,12 +69,15 @@ namespace StocksProject.Controllers
                 }
 
                 //Add to parent class
-                allInfo.Add(avData);
+                allMonthlyQuoteData.Add(avData);
+
+                //Increment name counter
+                curName++;
             }
 
-            return View(allInfo);
+            return View(allMonthlyQuoteData);
         }
-        public IActionResult StockPage()
+        public IActionResult Stocks()
         {
 
 
@@ -77,7 +85,7 @@ namespace StocksProject.Controllers
         }
 
 
-        public IActionResult Privacy()
+        public IActionResult Crypto()
         {
             return View();
         }

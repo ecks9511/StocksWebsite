@@ -1,28 +1,108 @@
-﻿@model List<StocksProject.Models.AlphaVantageData>
+﻿@using Chart.Mvc.ComplexChart
+@model List<StocksProject.Models.AVMonthlyQuoteData>
 @{
 
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1><br/>
 
-    <h2>Top Five Technology Stocks</h2>
+    <h3 class="m-2">Top Five Technology Stocks</h3>
 
-        @for(int i = 0; i < @Model.Count(); i++)
-        {
-            <div class="d-inline-block text-left p-2">
-                <div class="font-weight-bold">@Model[i].Entries[0].Symbol.ToString()</div>
-                <div>Open Price : @Model[i].Entries[0].Open.ToString("C2")</div>
-                <div>High Price : @Model[i].Entries[0].High.ToString("C2")</div>
-                <div>Low Price : @Model[i].Entries[0].Low.ToString("C2")</div>
-                <div>Price : @Model[i].Entries[0].Price.ToString("C2")</div>
-                <div>Volume : @Model[i].Entries[0].Volume.ToString()</div>
-                <div>Latest Day : @Model[i].Entries[0].LatestDay.ToString("MM-dd-yyyy")</div>
-                <div>Previous Close : @Model[i].Entries[0].PreviousClose.ToString("C2")</div>
-                <div>Change : @Model[i].Entries[0].Change.ToString("C2")</div>
-                <div>Change Percent : @Model[i].Entries[0].ChangePercent.ToString()</div>
+    <div style="width: 70%; height: 500px; margin: 0 auto"><canvas id="myChart"></canvas></div>
+    <script src="lib/chart.js/dist/Chart.js"></script>
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Google',
+                        data: [1340.56, 1420.88, 1480.33, 1570.55, 1533.47, 1627.56, 1587.11, 1498.23, 1578.65, 1601.86, 1597.36, 1627.56],
+                        backgroundColor: [
+                            'rgba(86, 204, 156, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(86, 86, 156, 0.7)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'Tesla',
+                        data: [380.45, 560.23, 589.99, 785.23, 645.21, 856.47, 901.57, 1100.89, 854.32, 775.12, 612.89, 440.76],
+                        backgroundColor: [
+                            'rgba(255, 0, 0, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 0, 0, 0.7)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'Microsoft',
+                        data: [129.75, 173.23, 205.13, 169.69, 178.45, 186.66, 208.23, 242.87, 268.69, 245.56, 229.48, 213.49],
+                        backgroundColor: [
+                            'rgba(0, 255, 0, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 255, 0, 0.7)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'Amazon',
+                        data: [3808.45, 3601.23, 3244.99, 3100.23, 2987.21, 3021.47, 3152.57, 3300.89, 3278.89, 3158.86, 3126.56, 3208.00],
+                        backgroundColor: [
+                            'rgba(0, 0, 255, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 0, 255, 0.7)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'Apple',
+                        data: [100.45, 121.23, 121.99, 111.23, 98.21, 95.47, 86.57, 89.89, 101.89, 121.86, 141.56, 117.64],
+                        backgroundColor: [
+                            'rgba(125, 125, 0, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(125, 125, 0, 0.7)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+
+    @for (int i = 0; i < @Model.Count(); i++)
+    {
+        <div class="d-inline-block text-left card bg-light border-primary w-30 m-1" style="max-width: 20rem">
+            <div class="card-header">@Model[i].Name</div>
+            <div class="card-body">
+                <h4 class="card-title" style="margin-top: 0">@Model[i].Symbol</h4>
+                <h5>Price : @Model[i].Entries[0].Open.ToString("C2")</h5>
+                <div style="font-size: small">
+                    <div>High Price : @Model[i].Entries[0].High.ToString("C2")</div>
+                    <div>Low Price : @Model[i].Entries[0].Low.ToString("C2")</div>
+                    <div>Close Price : @Model[i].Entries[0].Close.ToString("C2")</div>
+                    <div>Adjusted Close : @Model[i].Entries[0].AdjustedClose.ToString("C2")</div>
+                    <div>Volume : @Model[i].Entries[0].volume.ToString()</div>
+                    <div>Dividend Amount : @Model[i].Entries[0].DividendAmount.ToString("C2")</div>
+                </div>
             </div>
-        }
-
+        </div>
+    }
 </div>
+

@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 
 namespace StocksProject.Models
 {
-    public class AlphaVantageData 
+    public class AVMonthlyQuoteData
     {
+
         public string Name { get; set; } = "";
-        public List<Quote> Entries { get; set; } = new List<Quote>();
+        public string Symbol { get; set; } = "";
+        public List<MonthlyQuote> Entries { get; set; } = new List<MonthlyQuote>();
         public string ErrorMessage { get; set; } = "";
+
+        public ChartJSCore.Models.Chart FrontChart { get; set; }
     }
 }
