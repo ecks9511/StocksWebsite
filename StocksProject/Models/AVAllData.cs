@@ -7,6 +7,6 @@ namespace StocksProject.Models
 {
     public class AVAllData
     {
-        public List<AVMonthlyQuoteData> allMonthlyData { get; set; }
+        public List<AVMonthlyQuoteData> allMonthlyData { get; set; } = new List<AVMonthlyQuoteData>();
     }
 }
