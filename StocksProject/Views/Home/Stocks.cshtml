@@ -1,5 +1,6 @@
 ﻿@using Chart.Mvc.ComplexChart
 @using ChartJSCore.Models
+@using Newtonsoft.Json
 @model AVAllData;
 @{
 
@@ -12,47 +13,75 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script>
 
+        var dataObj = @Html.Raw(JsonConvert.SerializeObject(this.Model));
+        var datasetdata = [];
+        var numEntries = dataObj.allMonthlyData.length;
+        console.log(dataObj);
 
-        showChart();
+        for (var i = 0; i < numEntries; i++) {
+            var curNumEntries = dataObj.allMonthlyData[i].Entries.length;
+            var curName = dataObj.allMonthlyData[i].Symbol;
+            var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
+            var curLabels = [];
+            var curPriceData = [];
+
+
+            console.log(curNumEntries);
+            console.log(curName);
+
+            for (var j = 0; j < curNumEntries; j++) {
+                curPriceData[j] = dataObj.allMonthlyData[i].Entries[j].Open;
+                curLabels[j] = dataObj.allMonthlyData[i].EntryDateTime[j];
+            }
+            //bandaid fix
+            curLabels.reverse();
+            curPriceData.reverse();
+
+            console.log(curLabels);
+            console.log(curPriceData);
+            datasetdata[i] = {
+                    label: curName,
+                    fill: false,
+                    data: curPriceData,
+                    borderCapStyle: 'butt',
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: curColor[i],
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 2,
+                    pointHitRadius: 5,
+                    borderColor: curColor[i],
+                    borderWidth: 1.5,
+                    lineTension: 0
+                }
+            };
+
+
 
         function showChart() {
-            var ctx = document.getElementById('myChart').getContext('2d');
-            var myChart = new Chart(ctx,
+            var ctx = document.getElementById('myChart2').getContext('2d');
+            console.log(curLabels);
+            console.log(datasetdata);
+            var myChart2 = new Chart(ctx,
                 {
                     type: 'line',
                     data: {
-                        labels: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryDateTime)),
-                        datasets: [
-                            {
-                                label: 'Google',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(255,0,0,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(255, 0, 0, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            }
-                        ]
+                        labels: curLabels,
+                        datasets: datasetdata,
                     },
                     options: {
                         maintainAspectRatio: false
                     }
                 });
         }
+
+
+        showChart();
 
     </script>
 

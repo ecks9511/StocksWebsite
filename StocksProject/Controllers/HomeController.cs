@@ -33,7 +33,7 @@ namespace StocksProject.Controllers
             AVAllData allData = new AVAllData();
 
             //Stocks to grab with their corresponding full names
-            List<String> stockNames = new List<string> { "GOOG", "TSLA", "MSFT","AAPL","AMZN"};
+            List<String> stockNames = new List<string> { "MSFT", "AAPL", "HPQ", "NVDA","INTC"};
             string apiKey = "3Y8HPMEXDL322QUV";
 
             //Loop through each stock, grab the quote and add it to allData object
