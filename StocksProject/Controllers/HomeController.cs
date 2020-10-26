@@ -33,30 +33,42 @@ namespace StocksProject.Controllers
             AVAllData allData = new AVAllData();
 
             //Stocks to grab with their corresponding full names
-            List<String> stockNames = new List<string> { "GOOG", "TSLA", "MSFT", "AMZN", "AAPL" };
-            List<String> stockNamesFull = new List<string> { "Google", "Tesla", "Microsoft", "Amazon", "Apple" };
+            List<String> stockNames = new List<string> { "GOOG", "TSLA", "MSFT","AAPL","AMZN"};
+            string apiKey = "3Y8HPMEXDL322QUV";
 
             //Loop through each stock, grab the quote and add it to allData object
-            for(int i = 0; i < stockNames.Count; i++)
-                allData.allMonthlyData.Add(SingleStock(stockNamesFull[i], stockNames[i]));
+            for (int i = 0; i < stockNames.Count; i++)
+                allData.allMonthlyData.Add(SingleStock(stockNames[i]));
 
             return View(allData);
         }
+
         public IActionResult Stocks()
         {
+            //Make container for all monthly quotes
+            AVAllData allData = new AVAllData();
 
+            allData.allMonthlyData.Add(SingleStock("IBM"));
 
-            return View();
+            return View(allData);
         }
 
-        public AVMonthlyQuoteData SingleStock(string name, string symbol)
+        [HttpGet]
+        public IActionResult GetStock(AVAllData allData, string symbol)
         {
-            //API keys for calls
-            String apiKey = "3Y8HPMEXDL322QUV"; //String apiKey = "QBT57BYWKH947L5Z";
 
+            allData.allMonthlyData.Add(SingleStock(symbol));
+
+            return View("Stocks", allData);
+        }
+
+        public AVMonthlyQuoteData SingleStock(string symbol)
+        {
             //Lists for graphing
             List<double> openPrices = new List<double>();
             List<String> dates = new List<String>();
+
+            string apiKey = "08158IP9AW9WZIZW"; //"3Y8HPMEXDL322QUV"; //"QBT57BYWKH947L5Z";
 
             //Parent class for parsing down to nested values
             var curMonthlyQuote = new AVMonthlyQuoteData();
@@ -79,15 +91,13 @@ namespace StocksProject.Controllers
                         dates.Add(allMonthly[i].Timestamp.ToString("MM-dd-yyyy"));
 
                     }
-                    //So dates arent backwards
-                    dates.Reverse();
+
 
                     //Adding graph data
                     curMonthlyQuote.EntryOpenPrices = openPrices;
                     curMonthlyQuote.EntryDateTime = dates;
 
                     //Adding names to parent class
-                    curMonthlyQuote.Name = name;
                     curMonthlyQuote.Symbol = symbol;
 
 
@@ -101,6 +111,7 @@ namespace StocksProject.Controllers
 
                 return curMonthlyQuote;
         }
+
 
 
         public IActionResult Crypto()

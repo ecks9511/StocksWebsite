@@ -1,13 +1,64 @@
-﻿@model AVAllData
+﻿@using Chart.Mvc.ComplexChart
+@using ChartJSCore.Models
+@model AVAllData;
+@{
 
-<!DOCTYPE html>
+    ViewData["Title"] = "Stocks";
+}
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Random</title>
+<div class="text-center m-5">
 
-</head>
-<body>
-</body>
-</html>
+    <div style="width: 70%; height: 500px; margin: 0 auto"><canvas id="myChart2"></canvas></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+
+
+        showChart();
+
+        function showChart() {
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryDateTime)),
+                        datasets: [
+                            {
+                                label: 'Google',
+                                fill: false,
+                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryOpenPrices)),
+                                borderCapStyle: 'butt',
+                                borderDash: [],
+                                borderDashOffset: 0.0,
+                                borderJoinStyle: 'miter',
+                                pointBorderColor: "rgba(255,0,0,1)",
+                                pointBackgroundColor: "#fff",
+                                pointBorderWidth: 1,
+                                pointHoverRadius: 5,
+                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                                pointHoverBorderColor: "rgba(220,220,220,1)",
+                                pointHoverBorderWidth: 2,
+                                pointRadius: 2,
+                                pointHitRadius: 5,
+                                borderColor: [
+                                    'rgba(255, 0, 0, 0.7)'
+                                ],
+                                borderWidth: 1.5,
+                                lineTension: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        maintainAspectRatio: false
+                    }
+                });
+        }
+
+    </script>
+
+    <form method="get" action="GetStock">
+        <label for="symbol">Enter stock name: </label>
+        <input class="col-form-label d-inline-block m-1" type="text" name="symbol" id="symbol" />
+        <input class="btn btn-primary d-inline-block m-1" type="submit" value="Submit" />
+    </form>
+</div>

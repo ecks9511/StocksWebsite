@@ -1,4 +1,5 @@
 ﻿@using Chart.Mvc.ComplexChart
+@using Newtonsoft.Json
 @model AVAllData;
 @{
 
@@ -12,133 +13,66 @@
     <div style="width: 70%; height: 500px; margin: 0 auto"><canvas id="myChart"></canvas></div>
     <script src="lib/chart.js/dist/Chart.js"></script>
     <script>
-        showChart();
+        var dataObj = @Html.Raw(JsonConvert.SerializeObject(this.Model));
+        var datasetdata = [];
+        var numEntries = dataObj.allMonthlyData.length;
+        console.log(dataObj);
+
+        for (var i = 0; i < numEntries; i++) {
+            var curNumEntries = dataObj.allMonthlyData[i].Entries.length;
+            var curName = dataObj.allMonthlyData[i].Symbol;
+            var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
+            var curLabels = [];
+            var curPriceData = [];
+
+
+            console.log(curNumEntries);
+            console.log(curName);
+
+            for (var j = 0; j < curNumEntries; j++) {
+                curPriceData[j] = dataObj.allMonthlyData[i].Entries[j].Open;
+                curLabels[j] = dataObj.allMonthlyData[i].EntryDateTime[j];
+            }
+            //bandaid fix
+            curLabels.reverse();
+            curPriceData.reverse();
+
+            console.log(curLabels);
+            console.log(curPriceData);
+            datasetdata[i] = {
+                    label: curName,
+                    fill: false,
+                    data: curPriceData,
+                    borderCapStyle: 'butt',
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: curColor[i],
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 2,
+                    pointHitRadius: 5,
+                    borderColor: curColor[i],
+                    borderWidth: 1.5,
+                    lineTension: 0
+                }
+            };
+
+
 
         function showChart() {
-            console.log("Trying to show chart");
             var ctx = document.getElementById('myChart').getContext('2d');
+            console.log(curLabels);
+            console.log(datasetdata);
             var myChart = new Chart(ctx,
                 {
                     type: 'line',
                     data: {
-                        labels: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryDateTime)),
-                        datasets: [
-                            {
-                                label: 'Google',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[0].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(255,0,0,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(255, 0, 0, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            },
-                            {
-                                label: 'Tesla',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[1].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(255,128,0,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(255, 128, 0, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            },
-                            {
-                                label: 'Microsoft',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[2].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(0,0,255,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(0, 0, 255, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            },
-                            {
-                                label: 'Amazon',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[3].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(127,0,255,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(127, 0, 255, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            },
-                            {
-                                label: 'Apple',
-                                fill: false,
-                                data: @Html.Raw(Json.Serialize(Model.allMonthlyData[4].EntryOpenPrices)),
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba(225,0,127,1)",
-                                pointBackgroundColor: "#fff",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 2,
-                                pointHitRadius: 5,
-                                borderColor: [
-                                    'rgba(225, 0, 127, 0.7)'
-                                ],
-                                borderWidth: 1.5,
-                                lineTension: 0
-                            }
-                        ]
+                        labels: curLabels,
+                        datasets: datasetdata,
                     },
                     options: {
                         maintainAspectRatio: false
@@ -147,6 +81,8 @@
         }
 
 
+        showChart();
+
     </script>
     
 
@@ -154,7 +90,6 @@
     @for (int i = 0; i < @Model.allMonthlyData.Count(); i++)
     {
         <div class="d-inline-block text-left card bg-light border-primary w-30 m-2" style="max-width: 20rem">
-            <div class="card-header">@Model.allMonthlyData[i].Name</div>
             <div class="card-body">
                 <h4 class="card-title" style="margin-top: 0">@Model.allMonthlyData[i].Symbol</h4>
                 <h5>Price : @Model.allMonthlyData[i].Entries[0].Open.ToString("C2")</h5>
