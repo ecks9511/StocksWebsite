@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ServiceStack;
 using StocksProject.Models;
-
+using Microsoft.Extensions.Hosting;
 namespace StocksProject.Controllers
 {
     public class HomeController : Controller
@@ -19,40 +21,25 @@ namespace StocksProject.Controllers
 
         }*/
 
-        private IAvDataRepository _quotesService;
+        public IAvDataRepository _quotesService;
+        private IHostEnvironment _env;
 
-        public HomeController(IAvDataRepository quotesService)
+        public HomeController(IAvDataRepository quotesService, IHostEnvironment env)
         {
             _quotesService = quotesService;
-        }
-
-        [HttpGet]
-        public IEnumerable<AvMonthlyQuoteData> Get()
-        {
-            return _quotesService.GetAllQuotes();
+            _env = env;
         }
 
         [HttpPost]
-        public void Post([FromBody] string symbol)
+        public string GetAll()
         {
-            _quotesService.AddQuote(symbol);
-        }
-
-        [HttpDelete("{id}")]
-        public void Delete(string symbol)
-        {
-            _quotesService.DeleteQuote(symbol);
+            return _quotesService.GetQuotes(_env);
         }
 
         public IActionResult Index()
         {
-            List<string> stockSymbols = new List<string>() {"IBM"};
-            foreach (var s in stockSymbols)
-            {
-                _quotesService.AddQuote(s);
-            }
-
-            return View(_quotesService);
+            ViewData["AllStocks"] = GetAll();
+            return View();
         }
 
         public IActionResult Stocks()
