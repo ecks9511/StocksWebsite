@@ -11,6 +11,7 @@ namespace StocksProject.Models
     {
         void AddQuotes(List<string> symbolNames, IHostEnvironment env);
         string GetQuotes(IHostEnvironment env);
+        string GetQuotesLanding(IHostEnvironment env);
     }
 
 }

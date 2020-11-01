@@ -64,7 +64,7 @@ namespace StocksProject.Models
 
                 allData.Add(curMonthlyQuote);
             }
-            var path = env.ContentRootPath + "\\DataAccess\\stocks.txt";
+            var path = env.ContentRootPath + "\\DataAccess\\stocks2.txt";
 
             if (File.Exists(path))
             {
@@ -82,6 +82,11 @@ namespace StocksProject.Models
 
         }
         public string GetQuotes(IHostEnvironment env)
+        {
+            var content = System.IO.File.ReadAllText(env.ContentRootPath + "\\DataAccess\\stocks2.txt");
+            return content;
+        }
+        public string GetQuotesLanding(IHostEnvironment env)
         {
             var content = System.IO.File.ReadAllText(env.ContentRootPath + "\\DataAccess\\stocks.txt");
             return content;

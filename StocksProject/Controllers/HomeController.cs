@@ -36,14 +36,21 @@ namespace StocksProject.Controllers
             return _quotesService.GetQuotes(_env);
         }
 
+        public string GetAllLanding()
+        {
+            return _quotesService.GetQuotesLanding(_env);
+        }
+
+
         public IActionResult Index()
         {
-            ViewData["AllStocks"] = GetAll();
+            ViewData["AllStocksLanding"] = GetAllLanding();
             return View();
         }
 
         public IActionResult Stocks()
         {
+            ViewData["AllStocks"] = GetAll();
             return View();
         }
 
