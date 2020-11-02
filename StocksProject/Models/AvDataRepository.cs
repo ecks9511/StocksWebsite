@@ -15,70 +15,85 @@ namespace StocksProject.Models
     {
         public void AddQuotes(List<string> symbolNames, IHostEnvironment env)
         {
-            List<AvMonthlyQuoteData> allData = new List<AvMonthlyQuoteData>();
-            string apiKey = "08158IP9AW9WZIZW"; //"3Y8HPMEXDL322QUV"; //"QBT57BYWKH947L5Z";
-
-            foreach (var s in symbolNames)
+            if (!symbolNames.IsNullOrEmpty())
             {
-                //Parent class for parsing down to nested values
-                var curMonthlyQuote = new AvMonthlyQuoteData();
+                List<AvMonthlyQuoteData> allData = new List<AvMonthlyQuoteData>();
+                string apiKey = "08158IP9AW9WZIZW"; //"3Y8HPMEXDL322QUV"; //"QBT57BYWKH947L5Z";
+                Boolean alreadyAdded = false;
 
-                //Lists for graphing
-                List<double> openPrices = new List<double>();
-                List<String> dates = new List<String>();
-
-                //Send string to api and get back CSV file in string
-                var response =
-                    $"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={s}&datatype=csv&apikey={apiKey}"
-                        .GetStringFromUrl();
-
-                Console.WriteLine(response);
-                try
+                foreach (var s in symbolNames)
                 {
-                    //Parse data from CSV string to new variable
-                    var allMonthly = response.FromCsv<List<MonthlyQuote>>().ToList();
+                    //Parent class for parsing down to nested values
+                    var curMonthlyQuote = new AvMonthlyQuoteData();
 
-                    //Add all of the prices to parent object for later graphing
-                    for (int i = 0; i < allMonthly.Count; i++)
+                    //Lists for graphing
+                    List<double> openPrices = new List<double>();
+                    List<String> dates = new List<String>();
+
+                    //Send string to api and get back CSV file in string
+                    var response =
+                        $"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={s}&datatype=csv&apikey={apiKey}"
+                            .GetStringFromUrl();
+
+                    Console.WriteLine(response);
+                    try
                     {
-                        openPrices.Add(allMonthly[i].Open);
-                        dates.Add(allMonthly[i].Timestamp.ToString("MM-dd-yyyy"));
+                        //Parse data from CSV string to new variable
+                        var allMonthly = response.FromCsv<List<MonthlyQuote>>().ToList();
 
+                        //Add all of the prices to parent object for later graphing
+                        for (int i = 0; i < allMonthly.Count; i++)
+                        {
+                            openPrices.Add(allMonthly[i].Open);
+                            dates.Add(allMonthly[i].Timestamp.ToString("MM-dd-yyyy"));
+
+                        }
+
+                        //Adding graph data
+                        curMonthlyQuote.EntryOpenPrices = openPrices;
+                        curMonthlyQuote.EntryDateTime = dates;
+
+                        //Adding names to parent class
+                        curMonthlyQuote.Symbol = s;
+
+
+                        //Put parsed data into AlphaVantage object for use in view
+                        curMonthlyQuote.Entries = allMonthly.ToList();
+                    }
+                    catch
+                    {
+                        curMonthlyQuote.ErrorMessage = "ERROR : Information parsed incorrectly";
                     }
 
-                    //Adding graph data
-                    curMonthlyQuote.EntryOpenPrices = openPrices;
-                    curMonthlyQuote.EntryDateTime = dates;
-
-                    //Adding names to parent class
-                    curMonthlyQuote.Symbol = s;
-
-
-                    //Put parsed data into AlphaVantage object for use in view
-                    curMonthlyQuote.Entries = allMonthly.ToList();
+                    allData.Add(curMonthlyQuote);
                 }
-                catch
+
+                var path = env.ContentRootPath + "\\DataAccess\\stocks2.txt";
+
+                if (File.Exists(path))
                 {
-                    curMonthlyQuote.ErrorMessage = "ERROR : Information parsed incorrectly";
+                    var jsonData = File.ReadAllText(path);
+                    var convertedQuoteData = JsonConvert.DeserializeObject<List<AvMonthlyQuoteData>>(jsonData)
+                                             ?? new List<AvMonthlyQuoteData>();
+
+                    for (int i = 0; i < convertedQuoteData.Count; i++)
+                    {
+                        for (int j = 0; j < symbolNames.Count && !alreadyAdded; j++)
+                            if (convertedQuoteData[i].Symbol == symbolNames[j])
+                                alreadyAdded = true;
+                    }
+
+                    if (alreadyAdded == false)
+                        convertedQuoteData.AddRange(allData);
+
+                    // Update json data string
+                    jsonData = JsonConvert.SerializeObject(convertedQuoteData);
+                    System.IO.File.WriteAllText(path, jsonData);
+
                 }
-
-                allData.Add(curMonthlyQuote);
+                else
+                    File.AppendAllText(path, JsonConvert.SerializeObject(allData));
             }
-            var path = env.ContentRootPath + "\\DataAccess\\stocks2.txt";
-
-            if (File.Exists(path))
-            {
-                var jsonData = File.ReadAllText(path);
-                var convertedQuoteData = JsonConvert.DeserializeObject<List<AvMonthlyQuoteData>>(jsonData)
-                                      ?? new List<AvMonthlyQuoteData>();
-                convertedQuoteData.AddRange(allData);
-                // Update json data string
-                jsonData = JsonConvert.SerializeObject(convertedQuoteData);
-                System.IO.File.WriteAllText(path, jsonData);
-            }
-            else
-                File.AppendAllText(path, JsonConvert.SerializeObject(allData));
-
 
         }
         public string GetQuotes(IHostEnvironment env)
@@ -91,6 +106,27 @@ namespace StocksProject.Models
             var content = System.IO.File.ReadAllText(env.ContentRootPath + "\\DataAccess\\stocks.txt");
             return content;
         }
+
+        public void DeleteQuote(string symbolName, IHostEnvironment env)
+        {
+            var path = env.ContentRootPath + "\\DataAccess\\stocks2.txt";
+
+            if (File.Exists(path))
+            {
+                var jsonData = File.ReadAllText(path);
+                var convertedQuoteData = JsonConvert.DeserializeObject<List<AvMonthlyQuoteData>>(jsonData)
+                                         ?? new List<AvMonthlyQuoteData>();
+
+                convertedQuoteData.RemoveAll(x => x.Symbol == symbolName);
+
+                    // Update json data string
+                var newJsonData = JsonConvert.SerializeObject(convertedQuoteData);
+                System.IO.File.WriteAllText(path, string.Empty);
+                System.IO.File.WriteAllText(path, newJsonData);
+            }
+
+        }
+
     }
 
 

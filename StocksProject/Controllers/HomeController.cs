@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -31,6 +33,24 @@ namespace StocksProject.Controllers
         }
 
         [HttpPost]
+        public IActionResult DeleteStock(string symbolName)
+        {
+            _quotesService.DeleteQuote(symbolName,_env);
+            ViewData["AllStocks"] = GetAll();
+            return View("Stocks");
+        }
+
+
+        [HttpPost]
+        public IActionResult AddStock(IFormCollection form)
+        {
+            string stockName = Convert.ToString(form["symbolName"]);
+            List<string> names = new List<string>() { stockName };
+            _quotesService.AddQuotes(names, _env);
+            ViewData["AllStocks"] = GetAll();
+            return View("Stocks");
+        }
+
         public string GetAll()
         {
             return _quotesService.GetQuotes(_env);

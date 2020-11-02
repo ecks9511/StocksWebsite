@@ -7,7 +7,7 @@
 }
 
 <div class="text-center m-5">
-
+    <h3 class="m-2">Stock Portfolio</h3>
     <div style="width: 70%; height: 500px; margin: 0 auto"><canvas id="myChart2"></canvas></div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -52,9 +52,10 @@
                 lineTension: 0
             }
         };
+
         function showChart() {
-            var ctx = document.getElementById('myChart').getContext('2d');
-            var myChart = new Chart(ctx,
+            var ctx = document.getElementById('myChart2').getContext('2d');
+            var myChart2 = new Chart(ctx,
                 {
                     type: 'line',
                     data: {
@@ -67,23 +68,111 @@
                 });
         }
 
-        showChart();
+        function fillOutTable() {
+            var toAddStocks = document.createDocumentFragment();
+            var targetStocks = document.getElementById("stockTableBody");
 
-        function fetchStock(model) {
-            var text = $("#symbol").val();
+            console.log(dataObj);
+            console.log(targetStocks);
+            console.log(toAddStocks);
+
+            for (var i = 0; i < numEntries; i++) {
+                var stockRow = document.createElement('tr');
+                stockRow.id = 'stockRow_' + i;
+                toAddStocks.appendChild(stockRow);
+                var stockSymbol = document.createElement('th');
+                stockSymbol.scope = "col";
+                stockSymbol.textContent = dataObj[i].Symbol;
+                stockRow.appendChild(stockSymbol);
+                var stockOpen = document.createElement('th');
+                stockOpen.scope = "col";
+                stockOpen.textContent = '$'+dataObj[i].Entries[0].Open.toFixed(2);
+                stockRow.appendChild(stockOpen);
+                var stockHigh = document.createElement('th');
+                stockHigh.scope = "col";
+                stockHigh.textContent = '$' +dataObj[i].Entries[0].High.toFixed(2);
+                stockRow.appendChild(stockHigh);
+                var stockLow = document.createElement('th');
+                stockLow.scope = "col";
+                stockLow.textContent = '$' +dataObj[i].Entries[0].Low.toFixed(2);
+                stockRow.appendChild(stockLow);
+                var stockClose = document.createElement('th');
+                stockClose.scope = "col";
+                stockClose.textContent = '$' +dataObj[i].Entries[0].Close.toFixed(2);
+                stockRow.appendChild(stockClose);
+                var stockVolume = document.createElement('th');
+                stockVolume.scope = "col";
+                stockVolume.textContent = dataObj[i].Entries[0].Volume;
+                stockRow.appendChild(stockVolume);
+                var stockDelete = document.createElement('th');
+                stockDelete.scope = "col";
+                stockDelete.innerHTML = '<button type="button" class="btn btn-secondary" onclick="RemoveStock(this)">Delete</button>';
+                stockDelete.id = dataObj[i].Symbol;
+                stockRow.appendChild(stockDelete);
+
+
+            }
+            targetStocks.appendChild(toAddStocks);
+        }
+
+        $(document).ready(function() {
+            showChart();
+            fillOutTable();
+        });
+
+        function RemoveStock(o) {
+            var name = o.parentNode.id;
+            console.log(name);
             $.ajax({
-                url: 'Home',
-                data: { id: id },
-            }).done(function () {
-                alert('Added');
+                url: '@Url.Action("DeleteStock", "Home")',
+                type: "POST",
+                async: true,
+                data: { symbolName: name },
+                success: function (data) {
+                    console.log("Success!");
+                    console.log(data);
+                    dataObj = @Html.Raw(ViewData["AllStocks"]);
+                    window.location.reload(true); 
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
             });
+
+
         }
 
 
     </script>
-</div> 
-<div class="form-group text-center">
-    <input type="text" class="form-control d-inline-block"id="inputDefault" style="width: 100px">
-    <button type="button" class="btn btn-primary d-inline-block">Submit</button>
+    
+    <table class="table table-hover" style=" table-layout: fixed; font-size: small; width: 70%; margin-left: auto; margin-right: auto;" id="tableFull">
+        <thead>
+        <tr>
+            <th scope="col">Stock Symbol</th>
+            <th scope="col">Current Open Price</th>
+            <th scope="col">Current High Price</th>
+            <th scope="col">Current Low Price</th>
+            <th scope="col">Current Close Price</th>
+            <th scope="col">Current Volume</th>
+            <th scope="col">Remove Stock?</th>
+        </tr>
+        </thead>
+        <tbody id="stockTableBody">
+        </tbody>
+    </table>
+    <div class="form-group">
+        @using (Html.BeginForm("AddStock", "Home", FormMethod.Post, new { symbolName = "tempName" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="text" id="idSymbolName" name="symbolName">      
+            <input type="submit" id ="symbolSubmit" value="Add Stock" class="btn btn-primary d-inline-block" />
+        }
+    </div>    
+
 </div>
+
 
