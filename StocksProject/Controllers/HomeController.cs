@@ -42,25 +42,22 @@ namespace StocksProject.Controllers
 
 
         [HttpPost]
-        public IActionResult AddStock(IFormCollection form)
+        public IActionResult AddStock(string symbolName)
         {
-            string stockName = Convert.ToString(form["symbolName"]);
-            List<string> names = new List<string>() { stockName };
-            _quotesService.AddQuotes(names, _env);
+            _quotesService.AddQuotes(symbolName, _env);
             ViewData["AllStocks"] = GetAll();
             return View("Stocks");
         }
-
+        [HttpGet]
         public string GetAll()
         {
             return _quotesService.GetQuotes(_env);
         }
-
+        [HttpGet]
         public string GetAllLanding()
         {
             return _quotesService.GetQuotesLanding(_env);
         }
-
 
         public IActionResult Index()
         {

@@ -13,47 +13,79 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
 
-        var dataObj =  @Html.Raw(ViewData["AllStocks"]);
+
+        console.log("Check1");
+        var dataObj = @Html.Raw(ViewData["AllStocks"]);
         var datasetdata = [];
+        var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
+        var curLabels = [];
+        var numEntries;
 
-        var numEntries = dataObj.length;
+        function getAllStocks(callback) {
+            console.log("Check2");
+            $.ajax({
+                url: '@Url.Action("GetAll", "Home")',
+                async: false,
+                type: "GET",
+                success: function(data) {
+                    console.log("Get Success!");
+                    dataObj = @Html.Raw(ViewData["AllStocks"]);
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Get Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
 
-        for (var i = 0; i < numEntries; i++) {
-            var curNumEntries = dataObj[i].Entries.length;
-            var curName = dataObj[i].Symbol;
-            var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
-            var curLabels = [];
-            var curPriceData = [];
-            for (var j = 0; j < curNumEntries; j++) {
-                curPriceData[j] = dataObj[i].Entries[j].Open;
-                curLabels[j] = dataObj[i].EntryDateTime[j];
-            }
-            //bandaid fix
-            curLabels.reverse();
-            curPriceData.reverse();
-            datasetdata[i] = {
-                label: curName,
-                fill: false,
-                data: curPriceData,
-                borderCapStyle: 'butt',
-                borderDashOffset: 0.0,
-                borderJoinStyle: 'miter',
-                pointBorderColor: curColor[i],
-                pointBackgroundColor: "#fff",
-                pointBorderWidth: 1,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                pointHoverBorderColor: "rgba(220,220,220,1)",
-                pointHoverBorderWidth: 2,
-                pointRadius: 2,
-                pointHitRadius: 5,
-                borderColor: curColor[i],
-                borderWidth: 1.5,
-                lineTension: 0
-            }
-        };
+            callback();
+        }
 
-        function showChart() {
+        function fillOutChart(callback) {
+            console.log("Check3");
+            console.log(dataObj);
+            numEntries = dataObj.length;
+
+            for (var i = 0; i < numEntries; i++) {
+                var curNumEntries = dataObj[i].Entries.length;
+                var curName = dataObj[i].Symbol;
+                var curPriceData = [];
+                for (var j = 0; j < curNumEntries; j++) {
+                    curPriceData[j] = dataObj[i].Entries[j].Open;
+                    curLabels[j] = dataObj[i].EntryDateTime[j];
+                }
+                //bandaid fix
+                curLabels.reverse();
+                curPriceData.reverse();
+                datasetdata[i] = {
+                    label: curName,
+                    fill: false,
+                    data: curPriceData,
+                    borderCapStyle: 'butt',
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: curColor[i],
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 2,
+                    pointHitRadius: 5,
+                    borderColor: curColor[i],
+                    borderWidth: 1.5,
+                    lineTension: 0
+                }
+            };
+
+            callback();
+        }
+
+        function showChart(callback) {
+            console.log("Check4");
             var ctx = document.getElementById('myChart2').getContext('2d');
             var myChart2 = new Chart(ctx,
                 {
@@ -66,13 +98,15 @@
                         maintainAspectRatio: false
                     }
                 });
+
+            callback();
         }
 
-        function fillOutTable() {
+        function fillOutTable(callback) {
+            console.log("Check5");
             var toAddStocks = document.createDocumentFragment();
             var targetStocks = document.getElementById("stockTableBody");
 
-            console.log(dataObj);
             console.log(targetStocks);
             console.log(toAddStocks);
 
@@ -86,19 +120,19 @@
                 stockRow.appendChild(stockSymbol);
                 var stockOpen = document.createElement('th');
                 stockOpen.scope = "col";
-                stockOpen.textContent = '$'+dataObj[i].Entries[0].Open.toFixed(2);
+                stockOpen.textContent = '$' + dataObj[i].Entries[0].Open.toFixed(2);
                 stockRow.appendChild(stockOpen);
                 var stockHigh = document.createElement('th');
                 stockHigh.scope = "col";
-                stockHigh.textContent = '$' +dataObj[i].Entries[0].High.toFixed(2);
+                stockHigh.textContent = '$' + dataObj[i].Entries[0].High.toFixed(2);
                 stockRow.appendChild(stockHigh);
                 var stockLow = document.createElement('th');
                 stockLow.scope = "col";
-                stockLow.textContent = '$' +dataObj[i].Entries[0].Low.toFixed(2);
+                stockLow.textContent = '$' + dataObj[i].Entries[0].Low.toFixed(2);
                 stockRow.appendChild(stockLow);
                 var stockClose = document.createElement('th');
                 stockClose.scope = "col";
-                stockClose.textContent = '$' +dataObj[i].Entries[0].Close.toFixed(2);
+                stockClose.textContent = '$' + dataObj[i].Entries[0].Close.toFixed(2);
                 stockRow.appendChild(stockClose);
                 var stockVolume = document.createElement('th');
                 stockVolume.scope = "col";
@@ -113,12 +147,8 @@
 
             }
             targetStocks.appendChild(toAddStocks);
+            callback();
         }
-
-        $(document).ready(function() {
-            showChart();
-            fillOutTable();
-        });
 
         function RemoveStock(o) {
             var name = o.parentNode.id;
@@ -126,52 +156,79 @@
             $.ajax({
                 url: '@Url.Action("DeleteStock", "Home")',
                 type: "POST",
-                async: true,
                 data: { symbolName: name },
-                success: function (data) {
-                    console.log("Success!");
+                success: function(data) {
+                    console.log("Remove Success!");
                     console.log(data);
-                    dataObj = @Html.Raw(ViewData["AllStocks"]);
-                    window.location.reload(true); 
+                    window.location.reload(true);
                 },
                 error: function(request, status, error) {
                     // process error message
-                    console.log("Failure!");
+                    console.log("Remove Failure!");
                     console.log(request);
                     console.log(status);
                     console.log(error);
                 }
             });
-
-
         }
 
+        function AddStock() {
+            var name = $("#idSymbolName").val();
+            $.ajax({
+                url: '@Url.Action("AddStock", "Home")',
+                type: "POST",
+                data: { symbolName: name },
+                success: function(data) {
+                    console.log("Add Success!");
+                    console.log(data);
+                    window.location.reload(true);
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Add Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function doAll() {
+            getAllStocks(function() {
+                fillOutChart(function() {
+                    showChart(function () {
+                        fillOutTable(function() {
+                        });
+                    });
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            doAll();
+        });
 
     </script>
-    
+
     <table class="table table-hover" style=" table-layout: fixed; font-size: small; width: 70%; margin-left: auto; margin-right: auto;" id="tableFull">
         <thead>
-        <tr>
-            <th scope="col">Stock Symbol</th>
-            <th scope="col">Current Open Price</th>
-            <th scope="col">Current High Price</th>
-            <th scope="col">Current Low Price</th>
-            <th scope="col">Current Close Price</th>
-            <th scope="col">Current Volume</th>
-            <th scope="col">Remove Stock?</th>
-        </tr>
+            <tr>
+                <th scope="col">Stock Symbol</th>
+                <th scope="col">Current Open Price</th>
+                <th scope="col">Current High Price</th>
+                <th scope="col">Current Low Price</th>
+                <th scope="col">Current Close Price</th>
+                <th scope="col">Current Volume</th>
+                <th scope="col">Remove Stock?</th>
+            </tr>
         </thead>
         <tbody id="stockTableBody">
         </tbody>
     </table>
     <div class="form-group">
-        @using (Html.BeginForm("AddStock", "Home", FormMethod.Post, new { symbolName = "tempName" }))
-        {
-            @Html.AntiForgeryToken()
-            <input type="text" id="idSymbolName" name="symbolName">      
-            <input type="submit" id ="symbolSubmit" value="Add Stock" class="btn btn-primary d-inline-block" />
-        }
-    </div>    
+        <input type="text" id="idSymbolName" name="symbolName">
+        <button type="button" class="btn btn-primary" onclick="AddStock()">Add</button>
+    </div>
 
 </div>
 
