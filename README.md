@@ -8,7 +8,7 @@ Website using .NET Core MVC and the AlphaVantage API to provide up to date stock
 - Ensure views work correctly on devices with different screen sizes
 - Allow the user to change the time frame while looking at stock/crypto data
 
-![Alt text](StocksProject/img.png?raw=true "Title")
+![alt text](https://github.com/ecks9511/StocksWebsite/blob/master/img.png?raw=true
 
 
 (Project currently includes AlphaVantage API key...please get your own key through the AlphaVantage website)
