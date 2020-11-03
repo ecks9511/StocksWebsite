@@ -1,8 +1,240 @@
-﻿@using Microsoft.Extensions.Configuration
-@inject IAvDataRepository Service
+﻿@using Chart.Mvc.ComplexChart
+@using ChartJSCore.Models
+@using Newtonsoft.Json
 @{
-    ViewData["Title"] = "Crypto Listings";
+
+    ViewData["Title"] = "Crypto";
 }
-<h1>@ViewData["Crypto"]</h1>
-<
-@Service.
+
+<div class="text-center m-5">
+    <h3 class="m-2">Crypto Portfolio</h3>
+    <div style="width: 70%; height: 500px; margin: 0 auto"><canvas id="myChart3"></canvas></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+
+
+        console.log("Check1");
+        var dataObj = @Html.Raw(ViewData["AllCrypto"]);
+        var datasetdata = [];
+        var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
+        var curLabels = [];
+        var numEntries;
+
+        function getAllCrypto(callback) {
+            console.log("Check2");
+            $.ajax({
+                url: '@Url.Action("GetAllCrypto", "Home")',
+                async: false,
+                type: "GET",
+                success: function(data) {
+                    console.log("Get Success!");
+                    dataObj = @Html.Raw(ViewData["AllCrypto"]);
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Get Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+
+            callback();
+        }
+
+        function fillOutChart(callback) {
+            console.log("Check3");
+            console.log(dataObj);
+            numEntries = dataObj.length;
+
+            for (var i = 0; i < numEntries; i++) {
+                var curNumEntries = dataObj[i].Entries.length;
+                var curName = dataObj[i].Symbol;
+                var curPriceData = [];
+                for (var j = 0; j < curNumEntries; j++) {
+                    curPriceData[j] = dataObj[i].Entries[j].Open;
+                    curLabels[j] = dataObj[i].EntryDateTime[j];
+                }
+                //bandaid fix
+                curLabels.reverse();
+                curPriceData.reverse();
+                datasetdata[i] = {
+                    label: curName,
+                    fill: false,
+                    data: curPriceData,
+                    borderCapStyle: 'butt',
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: curColor[i],
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 2,
+                    pointHitRadius: 5,
+                    borderColor: curColor[i],
+                    borderWidth: 1.5,
+                    lineTension: 0
+                }
+            };
+
+            callback();
+        }
+
+        function showChart(callback) {
+            console.log("Check4");
+            var ctx = document.getElementById('myChart3').getContext('2d');
+            var myChart3 = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: {
+                        labels: curLabels,
+                        datasets: datasetdata,
+                    },
+                    options: {
+                        maintainAspectRatio: false
+                    }
+                });
+
+            callback();
+        }
+
+        function fillOutTable(callback) {
+            console.log("Check5");
+            var toAddCrypto = document.createDocumentFragment();
+            var targetCrypto = document.getElementById("cryptoTableBody");
+
+            console.log(targetCrypto);
+            console.log(toAddCrypto);
+
+            for (var i = 0; i < numEntries; i++) {
+                var cryptoRow = document.createElement('tr');
+                cryptoRow.id = 'cryptoRow_' + i;
+                toAddCrypto.appendChild(cryptoRow);
+                var cryptoSymbol = document.createElement('th');
+                cryptoSymbol.scope = "col";
+                cryptoSymbol.textContent = dataObj[i].Symbol;
+                cryptoRow.appendChild(cryptoSymbol);
+                var cryptoOpen = document.createElement('th');
+                cryptoOpen.scope = "col";
+                cryptoOpen.textContent = '$' + dataObj[i].Entries[0].Open;
+                cryptoRow.appendChild(cryptoOpen);
+                var cryptoHigh = document.createElement('th');
+                cryptoHigh.scope = "col";
+                cryptoHigh.textContent = '$' + dataObj[i].Entries[0].High;
+                cryptoRow.appendChild(cryptoHigh);
+                var cryptoLow = document.createElement('th');
+                cryptoLow.scope = "col";
+                cryptoLow.textContent = '$' + dataObj[i].Entries[0].Low;
+                cryptoRow.appendChild(cryptoLow);
+                var cryptoClose = document.createElement('th');
+                cryptoClose.scope = "col";
+                cryptoClose.textContent = '$' + dataObj[i].Entries[0].Close;
+                cryptoRow.appendChild(cryptoClose);
+                var cryptoVolume = document.createElement('th');
+                cryptoVolume.scope = "col";
+                cryptoVolume.textContent = dataObj[i].Entries[0].Volume;
+                cryptoRow.appendChild(cryptoVolume);
+                var cryptoMarketCap = document.createElement('th');
+                cryptoMarketCap.scope = "col";
+                cryptoMarketCap.textContent = dataObj[i].Entries[0].MarketCap;
+                cryptoRow.appendChild(cryptoMarketCap);
+                var cryptoDelete = document.createElement('th');
+                cryptoDelete.scope = "col";
+                cryptoDelete.innerHTML = '<button type="button" class="btn btn-secondary" onclick="RemoveCrypto(this)">Delete</button>';
+                cryptoDelete.id = dataObj[i].Symbol;
+                cryptoRow.appendChild(cryptoDelete);
+
+
+            }
+            targetCrypto.appendChild(toAddCrypto);
+            callback();
+        }
+
+        function RemoveCrypto(o) {
+            var name = o.parentNode.id;
+            console.log(name);
+            $.ajax({
+                url: '@Url.Action("DeleteCrypto", "Home")',
+                type: "POST",
+                data: { cryptoName: name },
+                success: function(data) {
+                    console.log("Remove Success!");
+                    console.log(data);
+                    window.location.reload(true);
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Remove Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function AddCrypto() {
+            var name = $("#idCryptoName").val();
+            $.ajax({
+                url: '@Url.Action("AddCrypto", "Home")',
+                type: "POST",
+                data: { cryptoName: name },
+                success: function(data) {
+                    console.log("Add Success!");
+                    console.log(data);
+                    window.location.reload(true);
+                },
+                error: function(request, status, error) {
+                    // process error message
+                    console.log("Add Failure!");
+                    console.log(request);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function doAll() {
+            getAllCrypto(function() {
+                fillOutChart(function() {
+                    showChart(function () {
+                        fillOutTable(function() {
+                        });
+                    });
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            doAll();
+        });
+
+    </script>
+
+    <table class="table table-hover" style=" table-layout: fixed; font-size: small; width: 70%; margin-left: auto; margin-right: auto;" id="tableFull">
+        <thead>
+            <tr>
+                <th scope="col">Crypto Symbol</th>
+                <th scope="col">Current Open Price</th>
+                <th scope="col">Current High Price</th>
+                <th scope="col">Current Low Price</th>
+                <th scope="col">Current Close Price</th>
+                <th scope="col">Current Volume</th>
+                <th scope="col">Current Market Cap</th>
+                <th scope="col">Remove Crypto?</th>
+            </tr>
+        </thead>
+        <tbody id="cryptoTableBody">
+        </tbody>
+    </table>
+    <div class="form-group">
+        <input type="text" id="idCryptoName" name="cryptoName">
+        <button type="button" class="btn btn-primary" onclick="AddCrypto()">Add</button>
+    </div>
+
+</div>
+
+

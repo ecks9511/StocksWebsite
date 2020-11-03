@@ -44,9 +44,25 @@ namespace StocksProject.Controllers
         [HttpPost]
         public IActionResult AddStock(string symbolName)
         {
-            _quotesService.AddQuotes(symbolName, _env);
+            _quotesService.AddQuote(symbolName, _env);
             ViewData["AllStocks"] = GetAll();
             return View("Stocks");
+        }
+        [HttpPost]
+        public IActionResult DeleteCrypto(string cryptoName)
+        {
+            _quotesService.DeleteCrypto(cryptoName, _env);
+            ViewData["AllCrypto"] = GetAllCrypto();
+            return View("Crypto");
+        }
+
+
+        [HttpPost]
+        public IActionResult AddCrypto(string cryptoName)
+        {
+            _quotesService.AddCrypto(cryptoName, _env);
+            ViewData["AllCrypto"] = GetAllCrypto();
+            return View("Crypto");
         }
         [HttpGet]
         public string GetAll()
@@ -57,6 +73,11 @@ namespace StocksProject.Controllers
         public string GetAllLanding()
         {
             return _quotesService.GetQuotesLanding(_env);
+        }
+        [HttpGet]
+        public string GetAllCrypto()
+        {
+            return _quotesService.GetCrypto(_env);
         }
 
         public IActionResult Index()
@@ -73,6 +94,7 @@ namespace StocksProject.Controllers
 
         public IActionResult Crypto()
         {
+            ViewData["AllCrypto"] = GetAllCrypto();
             return View();
         }
 

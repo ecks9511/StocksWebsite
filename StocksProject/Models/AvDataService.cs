@@ -9,10 +9,15 @@ namespace StocksProject.Models
 {
     public interface IAvDataRepository
     {
-        void AddQuotes(string symbolName, IHostEnvironment env);
+        void AddQuote(string symbolName, IHostEnvironment env);
+        void AddCrypto(string cryptoName, IHostEnvironment env);
         string GetQuotes(IHostEnvironment env);
         string GetQuotesLanding(IHostEnvironment env);
+
+        string GetCrypto(IHostEnvironment env);
         void DeleteQuote(string symbolName, IHostEnvironment env);
+
+        void DeleteCrypto(string cryptoName, IHostEnvironment env);
     }
 
 }
