@@ -2,16 +2,16 @@
 @using Newtonsoft.Json
 @{ ViewData["Title"] = "Home Page"; }
 
-<div class="text-center">
-
+<div class="text-center" style="margin-top: 2em">
+    
     <h3 class="m-2">Top Technology Stocks</h3>
 
-    <div style="width: 70%; height: 450px; margin: 0 auto"><canvas id="myChart"></canvas></div>
+    <div style="width: 70%; height: 450px; margin-left: auto; margin-right: auto; margin-top: 2rem;"><canvas id="myChart"></canvas></div>
     <script src="lib/chart.js/dist/Chart.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     <script>
-        var dataObj =  @Html.Raw(ViewData["AllStocksLanding"]);
+        var dataObj = @Html.Raw(ViewData["AllStocksLanding"]);
         var datasetdata = [];
 
         var numEntries = dataObj.length;
@@ -19,7 +19,7 @@
         for (var i = 0; i < numEntries; i++) {
             var curNumEntries = dataObj[i].Entries.length;
             var curName = dataObj[i].Symbol;
-            var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
+            var curColor = ['rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)', 'rgba(255, 0, 0, 0.7)', 'rgba(255, 128, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(127,0,255,1)', 'rgba(225, 0, 127, 0.7)'];
             var curLabels = [];
             var curPriceData = [];
             for (var j = 0; j < curNumEntries; j++) {
@@ -33,6 +33,7 @@
                 label: curName,
                 fill: false,
                 data: curPriceData,
+                backgroundColor: curColor[i],
                 borderCapStyle: 'butt',
                 borderDashOffset: 0.0,
                 borderJoinStyle: 'miter',
@@ -50,6 +51,7 @@
                 lineTension: 0
             }
         };
+
         function showChart() {
             var ctx = document.getElementById('myChart').getContext('2d');
             var myChart = new Chart(ctx,
@@ -60,7 +62,19 @@
                         datasets: datasetdata,
                     },
                     options: {
-                        maintainAspectRatio: false
+                        maintainAspectRatio: false,
+                        scales: {
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        // Include a dollar sign in the ticks
+                                        callback: function(value, index, values) {
+                                            return '$' + value.toFixed(2);
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     }
                 });
         }
@@ -68,19 +82,16 @@
         showChart();
 
     </script>
-    <div id="cardContainer"></div>
+    <div id="cardContainer" style="margin-bottom: 5em; margin-top: 2em;"></div>
     <script>
         var toAdd = document.createDocumentFragment();
         var target = document.getElementById("cardContainer");
-        console.log('dataobj : ' + dataObj);
-        console.log('target : ' + target);
-        console.log('toAdd : ' + toAdd);
 
         for (var i = 0; i < numEntries; i++) {
             var cardBorder = document.createElement('div');
             cardBorder.id = 'cardBorder_' + i;
             cardBorder.className = 'd-inline-block text-left card bg-light border-primary w-30 m-2';
-            cardBorder.style = "max-width: 15rem";
+            cardBorder.style = "max-width: 15rem;";
             toAdd.appendChild(cardBorder);
             var cardBody = document.createElement('div');
             cardBody.id = 'cardBody_' + i;
