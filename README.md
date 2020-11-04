@@ -8,6 +8,8 @@ Website using .NET Core MVC and the AlphaVantage API to provide up to date stock
 - Ensure views work correctly on devices with different screen sizes
 - Allow the user to change the time frame while looking at stock/crypto data
 
+Note: Some data might show up strange on the graphs. This is a problem with the alphavantage api.
+
 Getting your own AlphaVantage API key can be done here: https://www.alphavantage.co/support/#api-key
 
 A list of crypto abbreviations can be found here: https://www.alphavantage.co/digital_currency_list/
